@@ -20,7 +20,7 @@ class BasicBlock(nn.Module):
         self.conv1 = Conv2d_3x3(in_size, out_size, stride)
         self.bn1 = nn.BatchNorm2d(out_size)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = Conv2d_3x3(in_size, out_size, stride)
+        self.conv2 = Conv2d_3x3(out_size, out_size, stride)
         self.bn2 = nn.BatchNorm2d(out_size)
         self.downsample = downsample
 
@@ -41,6 +41,8 @@ class BasicBlock(nn.Module):
         out += identity
         return self.relu(out)
 
+
+
 class ResNet(nn.Module):
     def __init__(self, layers, num_classes=1000):
         super(ResNet, self).__init__()
@@ -57,7 +59,7 @@ class ResNet(nn.Module):
         self.layer2 = self._create_layer(128, layers[1], stride=2)
         self.layer3 = self._create_layer(256, layers[2], stride=2)
         self.layer4 = self._create_layer(512, layers[3], stride=2)
-        self.avgpool = nn.AvgPool2d((1,1))
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.fc = nn.Linear(512, num_classes)
 
     def _create_layer(self, output_size, blocks, stride=1, padding=(1,1)):
@@ -69,7 +71,7 @@ class ResNet(nn.Module):
                     nn.BatchNorm2d(output_size)
             )
         layers = []
-        layers.append(BasicBlock(self.input_size, output_size))
+        layers.append(BasicBlock(self.input_size, output_size, downsample=downsample))
         # create the first layer and change the size
         self.input_size = output_size
         for i in range(1, blocks):
