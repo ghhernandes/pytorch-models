@@ -1,5 +1,14 @@
 import torch
 import torch.nn as nn
+from torch.hub import load_state_dict_from_url
+
+model_urls = {
+    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
+    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
+    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth'
+}
 
 def Conv2d_3x3(in_size, out_size, stride=1, padding=(1,1)):
     """ Convolution with 3x3 kernel """
@@ -130,26 +139,41 @@ class ResNet(nn.Module):
             layers.append(block(self.input_size, output_size))
         return nn.Sequential(*layers) 
 
-def _resnet(arch, layers, block):
+def _resnet(arch, layers, block, pretrained):
     model = ResNet(layers, block=block)
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls[arch], progress=True)
+        model.load_state_dict(state_dict)
     return model
 
-def ResNet18():
-    return _resnet('resnet18', [2, 2, 2, 2], BasicBlock)
+def ResNet18(pretrained=False):
+    return _resnet('resnet18', [2, 2, 2, 2], BasicBlock, pretrained)
 
-def ResNet34():
-    return _resnet('resnet34', [3, 4, 6, 3], BasicBlock)
+def ResNet34(pretrained=False):
+    return _resnet('resnet34', [3, 4, 6, 3], BasicBlock, pretrained)
 
-def ResNet50():
-    return _resnet('resnet50', [3, 4, 6, 3], Bottleneck)
+def ResNet50(pretrained=False):
+    return _resnet('resnet50', [3, 4, 6, 3], Bottleneck, pretrained)
 
-def ResNet101():
-    return _resnet('resnet101', [3, 4, 23, 3], Bottleneck)
+def ResNet101(pretrained=False):
+    return _resnet('resnet101', [3, 4, 23, 3], Bottleneck, pretrained)
 
-def ResNet152():
-    return _resnet('resnet152', [3, 8, 36, 3], Bottleneck)
+def ResNet152(pretrained=False):
+    return _resnet('resnet152', [3, 8, 36, 3], Bottleneck, pretrained)
 
 
 if __name__ == '__main__':
-    model = ResNet18()
-    print(model)
+    print("ResNet18")
+    model = ResNet18(pretrained=True)
+    
+    print("ResNet34")
+    model = ResNet34(pretrained=True)
+    
+    print("ResNet50")
+    model = ResNet50(pretrained=True)
+    
+    print("ResNet101")
+    model = ResNet101(pretrained=True)
+    
+    print("ResNet152")
+    model = ResNet152(pretrained=True)
